@@ -1,4 +1,4 @@
 const serverless = require("serverless-http");
-const app = require("../server"); // server.js with cors configured
+const app = require("./server"); // your server.js
 
 module.exports = serverless(app);
