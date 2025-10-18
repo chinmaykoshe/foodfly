@@ -37,7 +37,7 @@ const Profile = () => {
     }, []);
 
     return (
-        <div className="min-h-screen flex justify-center items-center bg-gray-100">
+        <div className="py-36 flex justify-center items-center bg-gray-100">
             <div className="bg-white p-8 shadow-md rounded-lg w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-4">User Profile</h2>
 
@@ -48,7 +48,7 @@ const Profile = () => {
                     <div className="text-gray-700">
                         <p><strong>Name:</strong> {user.name}</p>
                         <p><strong>Email:</strong> {user.email}</p>
-                        <p><strong>Mobile:</strong> {user.mobNo}</p>
+                        <p><strong>Mobile:</strong> {user.mobno}</p>
                     </div>
                 )}
 

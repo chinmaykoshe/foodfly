@@ -24,7 +24,9 @@ const Login = () => {
 
       if (response.ok) {
         console.log("Login successful:", data);
-        localStorage.setItem("userId", data.user._id);
+
+        localStorage.setItem("userId", data.user.id);
+        localStorage.setItem("mobno", data.user.mobno);
         localStorage.setItem("role", data.user.role);
         navigate("/"); // Redirect after login
       } else {

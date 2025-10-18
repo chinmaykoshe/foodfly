@@ -7,113 +7,155 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const usersRes = await fetch("http://localhost:5000/users");
-        const ordersRes = await fetch("http://localhost:5000/orders");
+        const usersRes = await fetch("http://localhost:5000/users", {
+          headers: {
+            "x-user-id": userId,
+            "x-auth-token": token,
+          },
+        });
+
+        const ordersRes = await fetch("http://localhost:5000/orders", {
+          headers: {
+            "x-user-id": userId,
+            "x-auth-token": token,
+          },
+        });
+
+        if (!usersRes.ok) throw new Error("Failed to fetch users");
+        if (!ordersRes.ok) throw new Error("Failed to fetch orders");
 
         const usersData = await usersRes.json();
         const ordersData = await ordersRes.json();
 
-        if (usersRes.ok) setUsers(usersData);
-        if (ordersRes.ok) setOrders(ordersData);
+        setUsers(usersData);
+        setOrders(ordersData);
       } catch (err) {
-        setError("Error fetching data");
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAdminData();
-  }, []);
+  }, [userId, token]);
+
+  if (loading)
+    return <p className="text-blue-500 font-semibold text-center mt-10">Loading...</p>;
+  if (error) return <p className="text-red-500 text-center mt-10">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-center md:text-left">
+        Admin Panel
+      </h1>
 
       {/* Tabs */}
-      <div className="flex space-x-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 mb-4 md:mb-8">
         <button
           onClick={() => setActiveTab("orders")}
-          className={`px-4 py-2 rounded-t-lg font-medium transition ${activeTab === "orders" ? "bg-white border text-gray-800" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-            }`}
+          className={`px-4 py-2 rounded-lg font-medium transition text-sm sm:text-base ${
+            activeTab === "orders"
+              ? "bg-white border text-gray-800"
+              : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+          }`}
         >
           Orders
         </button>
         <button
           onClick={() => setActiveTab("users")}
-          className={`px-4 py-2 rounded-t-lg font-medium transition ${activeTab === "users" ? "bg-white border text-gray-800" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-            }`}
+          className={`px-4 py-2 rounded-lg font-medium transition text-sm sm:text-base ${
+            activeTab === "users"
+              ? "bg-white border text-gray-800"
+              : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+          }`}
         >
           Users
         </button>
       </div>
 
       {/* Content */}
-      <div className="bg-white shadow rounded-b-lg p-6">
-        {loading && <p className="text-blue-500 font-semibold">Loading...</p>}
-        {error && <p className="text-red-500 bg-red-100 border border-red-400 p-2 rounded">{error}</p>}
-
-        {/* Orders Tab */}
+      <div className="bg-white shadow rounded-lg p-3 md:p-6">
         {activeTab === "orders" && (
           <div>
-            <h2 className="text-2xl font-semibold mb-4">All Orders</h2>
-            <table className="min-w-full table-auto">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-2 text-left">Order ID</th>
-                  <th className="px-4 py-2 text-left">Customer</th>
-                  <th className="px-4 py-2 text-left">mob. no.</th>
-                  <th className="px-4 py-2 text-left">mail</th>
-                  <th className="px-4 py-2 text-left">Total (RS)</th>
-                  <th className="px-4 py-2 text-left">order items</th>
-                  <th className="px-4 py-2 text-left">date</th>
-                  <th className="px-4 py-2 text-left">time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map(order => (
-                  <tr key={order._id} className="border-t">
-                    <td className="px-4 py-2">{order._id}</td>
-                    <td className="px-4 py-2">{order.userId.name}</td>
-                    <td className="px-4 py-2">{order.userId.mobNo}</td>
-                    <td className="px-4 py-2">{order.userId.email}</td>
-                    <td className="px-4 py-2">{order.total}</td>
-                    <td className="px-4 py-2">{order.orderItems.map(item => item.name).join(", ")}</td> {/* ✅ Fixed */}
-                    <td className="px-4 py-2">{new Date(order.createdAt).toLocaleDateString()}</td>
-                    <td className="px-4 py-2">{new Date(order.createdAt).toLocaleTimeString()}</td>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">All Orders</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs sm:text-sm md:text-base border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 text-gray-700">
+                    <th className="px-2 py-2 text-left">Order ID</th>
+                    <th className="px-2 py-2 text-left">Customer</th>
+                    <th className="px-2 py-2 text-left">Mob. No.</th>
+                    <th className="px-2 py-2 text-left">Mail</th>
+                    <th className="px-2 py-2 text-left">Total (₹)</th>
+                    <th className="px-2 py-2 text-left">Items</th>
+                    <th className="px-2 py-2 text-left">Date</th>
+                    <th className="px-2 py-2 text-left">Time</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr
+                      key={order.id}
+                      className="border-t hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-2 py-2 break-all">{order.id}</td>
+                      <td className="px-2 py-2">{order.user?.name}</td>
+                      <td className="px-2 py-2">{order.user?.mobno}</td>
+                      <td className="px-2 py-2 break-all">{order.user?.email}</td>
+                      <td className="px-2 py-2 font-semibold text-gray-800">
+                        ₹{order.total}
+                      </td>
+                      <td className="px-2 py-2">
+                        {order.order_items?.map((item) => item.name).join(", ")}
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap">
+                        {new Date(order.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap">
+                        {new Date(order.created_at).toLocaleTimeString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
-        {/* Users Tab */}
         {activeTab === "users" && (
           <div>
-            <h2 className="text-2xl font-semibold mb-4">All Users</h2>
-            <table className="min-w-full table-auto">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-2 text-left">User ID</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Mobile</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(user => (
-                  <tr key={user._id} className="border-t">
-                    <td className="px-4 py-2">{user._id}</td>
-                    <td className="px-4 py-2">{user.name}</td>
-                    <td className="px-4 py-2">{user.email}</td>
-                    <td className="px-4 py-2">{user.mobNo}</td>
+            <h2 className="text-xl md:text-2xl font-semibold mb-4">All Users</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs sm:text-sm md:text-base border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 text-gray-700">
+                    <th className="px-2 py-2 text-left">User ID</th>
+                    <th className="px-2 py-2 text-left">Name</th>
+                    <th className="px-2 py-2 text-left">Email</th>
+                    <th className="px-2 py-2 text-left">Mobile</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr
+                      key={user.id}
+                      className="border-t hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-2 py-2 break-all">{user.id}</td>
+                      <td className="px-2 py-2">{user.name}</td>
+                      <td className="px-2 py-2 break-all">{user.email}</td>
+                      <td className="px-2 py-2">{user.mobno}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

@@ -3,11 +3,12 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 
 const Nav = () => {
     const navigate = useNavigate();
-    const userId = localStorage.getItem("userId"); // 🔥 Check if user is logged in
+    const userId = localStorage.getItem("userId"); // ✅ Check if user is logged in
+    const userRole = localStorage.getItem("role"); // ✅ Check user role
     const [menuOpen, setMenuOpen] = useState(false); // ✅ Mobile menu state
 
     const handleLogout = () => {
-        localStorage.removeItem("userId"); // ✅ Clear user session
+        localStorage.clear(); // ✅ Clear user session
         navigate("/login"); // Redirect to login
     };
 
@@ -15,7 +16,11 @@ const Nav = () => {
         { name: "Home", path: "/" },
         { name: "Menu", path: "/menu" },
         { name: "About Us", path: "/aboutus" },
-        userId ? { name: "Profile", path: "/profile" } : { name: "Login", path: "/login" }, // ✅ Show Profile only if logged in
+        userId ? { name: "Profile", path: "/profile" } : { name: "Login", path: "/login" },
+    ];
+
+    const adminNavItems = [
+        { name: "Admin Dashboard", path: "/admin" }
     ];
 
     return (
@@ -26,8 +31,8 @@ const Nav = () => {
                 </Link>
 
                 {/* ✅ Mobile Menu Toggle */}
-                <button className="md:hidden text-gray-800 text-2xl" onClick={() => setMenuOpen(!menuOpen)}>
-                    {menuOpen ? "✖" : "☰"} {/* Changes icon based on menu state */}
+                <button className="md:hidden lg:hidden text-gray-800 text-2xl" onClick={() => setMenuOpen(!menuOpen)}>
+                    {menuOpen ? "✖" : "☰"}
                 </button>
 
                 {/* ✅ Navigation Links for Desktop */}
@@ -46,7 +51,23 @@ const Nav = () => {
                         </NavLink>
                     ))}
 
-                    {/* Show Logout Button if User is Logged In */}
+                    {/* ✅ Admin Navigation (Visible only for Admins) */}
+                    {userRole === "admin" &&
+                        adminNavItems.map((item) => (
+                            <NavLink
+                                key={item.name}
+                                to={item.path}
+                                className={({ isActive }) =>
+                                    `text-red-700 font-medium px-3 py-1 rounded hover:bg-red-200 transition ${
+                                        isActive ? "bg-red-300 shadow" : ""
+                                    }`
+                                }
+                            >
+                                {item.name}
+                            </NavLink>
+                        ))}
+
+                    {/* ✅ Logout Button */}
                     {userId && (
                         <button
                             onClick={handleLogout}
@@ -66,11 +87,24 @@ const Nav = () => {
                             key={item.name}
                             to={item.path}
                             className="text-gray-800 font-medium px-3 py-2 rounded hover:bg-white transition"
-                            onClick={() => setMenuOpen(false)} // Close menu on link click
+                            onClick={() => setMenuOpen(false)}
                         >
                             {item.name}
                         </NavLink>
                     ))}
+
+                    {/* ✅ Admin Navigation in Mobile Menu */}
+                    {userRole === "admin" &&
+                        adminNavItems.map((item) => (
+                            <NavLink
+                                key={item.name}
+                                to={item.path}
+                                className="text-red-700 font-medium px-3 py-2 rounded hover:bg-red-200 transition"
+                                onClick={() => setMenuOpen(false)}
+                            >
+                                {item.name}
+                            </NavLink>
+                        ))}
 
                     {userId && (
                         <button

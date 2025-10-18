@@ -1,114 +1,175 @@
+require("dotenv").config(); // Must be first
 const express = require("express");
-const mongoose = require("mongoose");
+const cors = require("cors");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 app.use(express.json());
-
-const cors = require("cors");
 app.use(cors());
 
-// Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/foodfly");
+// Initialize Supabase client
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// Define User Schema
-const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    mobNo: { type: String, required: true },
-    password: { type: String, required: true },
-    role: { type: String, default: "user" },
-});
+// ------------------ Routes ------------------
 
-const User = mongoose.model("User", userSchema);
-
-// Define Order Schema
-const orderSchema = new mongoose.Schema({
-    orderItems: { type: Array, required: true },
-    total: { type: Number, required: true },
-    address: { type: String, required: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    createdAt: { type: Date, default: Date.now },
-});
-
-const Order = mongoose.model("Order", orderSchema);
-
-// Routes
+// Create a new user
 app.post("/users", async (req, res) => {
-    try {
-        const user = new User(req.body);
-        await user.save();
-        res.status(201).json(user);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+  try {
+    const { name, email, password, mobNo, role } = req.body;
+
+    if (!name || !email || !password || !mobNo) {
+      return res.status(400).json({ error: "All fields (name, email, password, mobNo) are required!" });
     }
+
+    const { data, error } = await supabase
+      .from("users")
+      .insert([{ name, email, password, mobno: mobNo, role: role || "user" }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({ message: "User created successfully!", user: data });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.get("/users", async (req, res) => {
-    try {
-        const users = await User.find();
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ error: "Error fetching users!" });
-    }
-});
-
-app.get("/orders", async (req, res) => {
-    try {
-        const orders = await Order.find().populate("userId", "name email mobNo");
-        res.json(orders);
-    } catch (error) {
-        res.status(500).json({ error: "Error fetching orders!" });
-    }
-});
-
-app.get("/orders/:userId", async (req, res) => {
-    try {
-        const orders = await Order.find({ userId: req.params.userId }).populate("userId", "name email mobNo"); // Get orders for a specific user
-        if (orders.length === 0) {
-            return res.status(404).json({ error: "No orders found for this user!" });
-        }
-        res.json(orders);
-    } catch (error) {
-        res.status(500).json({ error: "Server error fetching user's orders!" });
-    }
-});
-
-app.post("/orders", async (req, res) => {
-    try {
-        const order = new Order(req.body);
-        await order.save();
-        res.status(201).json(order);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-app.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        // Check if user exists
-        const user = await User.findOne({ email });
-        if (!user || user.password !== password) {
-            return res.status(401).json({ error: "Invalid credentials!" });
-        }
-
-        res.json({ message: "Login successful!", user });
-    } catch (error) {
-        res.status(500).json({ error: "Server error!" });
-    }
-});
-
+// Get single user
 app.get("/user/:id", async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ error: "User not found!" });
-        }
-        res.json(user);
-    } catch (error) {
-        res.status(500).json({ error: "Server error!" });
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, email, mobno, role")
+      .eq("id", req.params.id)
+      .single();
+
+    if (error || !data) throw error;
+    res.json(data);
+  } catch (error) {
+    res.status(404).json({ error: "User not found!" });
+  }
+});
+
+// Login
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required!" });
     }
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, email, mobno, role")
+      .eq("email", email)
+      .eq("password", password)
+      .single();
+
+    if (error || !data) {
+      return res.status(401).json({ error: "Invalid credentials!" });
+    }
+
+    res.json({ message: "Login successful!", user: data });
+  } catch (error) {
+    res.status(500).json({ error: "Server error!" });
+  }
+});
+
+// Create an order
+app.post("/orders", async (req, res) => {
+  try {
+    const { orderItems, total, address, userId } = req.body;
+
+    if (!orderItems || !total || !address || !userId) {
+      return res.status(400).json({ error: "All fields (orderItems, total, address, userId) are required!" });
+    }
+
+    const { data, error } = await supabase
+      .from("orders")
+      .insert([{ order_items: orderItems, total, address, user_id: userId }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({ message: "Order created successfully!", order: data });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Middleware to check admin role via header
+const checkAdmin = async (req, res, next) => {
+  try {
+    const userId = req.header("x-user-id"); // Admin must send user ID in header
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("id, role")
+      .eq("id", userId)
+      .single();
+
+    if (error || !user) return res.status(401).json({ error: "Unauthorized" });
+    if (user.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+
+    next();
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Admin: fetch all users
+app.get("/users", checkAdmin, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, email, mobno, role");
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: fetch all orders with user info (limited fields)
+app.get("/orders", checkAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 50;
+
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, total, address, order_items, created_at, user_id, users(id, name, email, mobno)")
+      .range((page - 1) * limit, page * limit - 1);
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Fetch orders for a specific user
+app.get("/orders/:userId", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, total, address, order_items, created_at")
+      .eq("user_id", req.params.userId);
+
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: "No orders found for this user!" });
+    }
+
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Server error fetching user's orders!" });
+  }
 });
 
 // Start server
