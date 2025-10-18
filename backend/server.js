@@ -1,51 +1,52 @@
+// backend/api.js (or any name for Vercel serverless)
+require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
+const serverless = require("serverless-http");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
-
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://foodfly-v6t7-git-main-chinmaykoshes-projects.vercel.app" // your frontend URL
-];
-
-app.use(cors({
-  origin: function(origin, callback){
-    // allow requests with no origin (like mobile apps, curl, Postman)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-user-id"]
-}));
-
-// Handle OPTIONS preflight requests for all routes
-app.options("*", cors());
-
-// JSON parsing
-app.use(express.json());
-
-// Supabase setup
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// -------------------- Routes --------------------
+// Allowed origins for CORS
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://your-frontend.vercel.app"
+];
 
-// Root
+// CORS middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-user-id");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  // Handle preflight
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+  next();
+});
+
+app.use(express.json());
+
+// ------------------ Routes ------------------
+
+// Root route
 app.get("/", (req, res) => {
   res.send("✅ FoodFly backend is live!");
 });
 
-// Create a new user
+// ------------------ Users ------------------
+
+// Create new user
 app.post("/users", async (req, res) => {
   try {
     const { name, email, password, mobNo, role } = req.body;
-    if (!name || !email || !password || !mobNo) {
+    if (!name || !email || !password || !mobNo)
       return res.status(400).json({ error: "All fields are required!" });
-    }
 
     const { data, error } = await supabase
       .from("users")
@@ -80,7 +81,8 @@ app.get("/user/:id", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Email and password required!" });
+    if (!email || !password)
+      return res.status(400).json({ error: "Email and password required!" });
 
     const { data, error } = await supabase
       .from("users")
@@ -96,13 +98,14 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Create an order
+// ------------------ Orders ------------------
+
+// Create order
 app.post("/orders", async (req, res) => {
   try {
     const { orderItems, total, address, userId } = req.body;
-    if (!orderItems || !total || !address || !userId) {
-      return res.status(400).json({ error: "All fields are required!" });
-    }
+    if (!orderItems || !total || !address || !userId)
+      return res.status(400).json({ error: "All fields required!" });
 
     const { data, error } = await supabase
       .from("orders")
@@ -117,7 +120,24 @@ app.post("/orders", async (req, res) => {
   }
 });
 
-// Middleware to check admin role
+// Get orders for specific user
+app.get("/orders/:userId", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, total, address, order_items, created_at")
+      .eq("user_id", req.params.userId);
+
+    if (error) throw error;
+    if (!data || data.length === 0) return res.status(404).json({ error: "No orders found!" });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Server error fetching orders!" });
+  }
+});
+
+// ------------------ Admin Middleware ------------------
 const checkAdmin = async (req, res, next) => {
   try {
     const userId = req.header("x-user-id");
@@ -138,10 +158,13 @@ const checkAdmin = async (req, res, next) => {
   }
 };
 
-// Admin: get all users
+// Admin: fetch all users
 app.get("/users", checkAdmin, async (req, res) => {
   try {
-    const { data, error } = await supabase.from("users").select("id, name, email, mobno, role");
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, email, mobno, role");
+
     if (error) throw error;
     res.json(data);
   } catch (err) {
@@ -149,15 +172,12 @@ app.get("/users", checkAdmin, async (req, res) => {
   }
 });
 
-// Admin: get all orders with user info
+// Admin: fetch all orders
 app.get("/orders", checkAdmin, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 50;
     const { data, error } = await supabase
       .from("orders")
-      .select("id, total, address, order_items, created_at, user_id, users(id, name, email, mobno)")
-      .range((page - 1) * limit, page * limit - 1);
+      .select("id, total, address, order_items, created_at, user_id, users(id, name, email, mobno)");
     if (error) throw error;
     res.json(data);
   } catch (err) {
@@ -165,20 +185,5 @@ app.get("/orders", checkAdmin, async (req, res) => {
   }
 });
 
-// Get orders for a user
-app.get("/orders/:userId", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("orders")
-      .select("id, total, address, order_items, created_at")
-      .eq("user_id", req.params.userId);
-
-    if (error) throw error;
-    if (!data || data.length === 0) return res.status(404).json({ error: "No orders found!" });
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: "Server error fetching orders!" });
-  }
-});
-
-module.exports = app; // export the configured Express app
+// ------------------ Export for Vercel ------------------
+module.exports = serverless(app);
