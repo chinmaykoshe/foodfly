@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import BackendUrl from './BackendUrl'
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("orders");
@@ -13,14 +14,14 @@ export default function AdminPanel() {
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const usersRes = await fetch("http://localhost:5000/users", {
+        const usersRes = await fetch(`${BackendUrl}/users`, {
           headers: {
             "x-user-id": userId,
             "x-auth-token": token,
           },
         });
 
-        const ordersRes = await fetch("http://localhost:5000/orders", {
+        const ordersRes = await fetch(`${BackendUrl}/orders`, {
           headers: {
             "x-user-id": userId,
             "x-auth-token": token,

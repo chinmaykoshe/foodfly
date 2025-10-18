@@ -20,7 +20,7 @@ const Profile = () => {
         // Fetch user profile
         const fetchUser = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/user/${userId}`);
+                const res = await fetch(`${BackendUrl}/user/${userId}`);
                 const data = await res.json();
                 if (res.ok) setUser(data);
                 else setError(`❌ ${data.error}`);
@@ -34,7 +34,7 @@ const Profile = () => {
         // Fetch user orders
         const fetchOrders = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/orders/${userId}`);
+                const res = await fetch(`${BackendUrl}/orders/${userId}`);
                 const data = await res.json();
                 if (res.ok) setOrders(data);
                 else setError(`❌ ${data.error}`);

@@ -18,7 +18,7 @@ const Profile = () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:5000/user/${userId}`);
+                const response = await fetch(`${BackendUrl}/user/${userId}`);
                 const data = await response.json();
 
                 if (response.ok) {
