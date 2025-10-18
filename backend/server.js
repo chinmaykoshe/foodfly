@@ -7,7 +7,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Initialize Supabase client
+// ✅ Root route for quick status check
+app.get("/", (req, res) => {
+  res.send("✅ FoodFly backend is live on Vercel!");
+});
+
+// ------------------ Supabase Setup ------------------
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // ------------------ Routes ------------------
@@ -172,6 +177,5 @@ app.get("/orders/:userId", async (req, res) => {
   }
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// ✅ Important for Vercel — don't use app.listen()
+module.exports = app;
