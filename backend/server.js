@@ -1,23 +1,35 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 
-// -------------------- Middleware --------------------
-app.use(express.json());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://foodfly-v6t7-git-main-chinmaykoshes-projects.vercel.app" // your frontend URL
+];
 
 app.use(cors({
-  origin: [
-    "http://localhost:3000",                         // local frontend
-    "https://your-frontend-vercel-url.vercel.app"    // production frontend
-  ],
+  origin: function(origin, callback){
+    // allow requests with no origin (like mobile apps, curl, Postman)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-user-id"]
 }));
 
-// -------------------- Supabase Setup --------------------
+// Handle OPTIONS preflight requests for all routes
+app.options("*", cors());
+
+// JSON parsing
+app.use(express.json());
+
+// Supabase setup
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // -------------------- Routes --------------------
