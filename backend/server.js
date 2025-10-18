@@ -8,7 +8,11 @@ const app = require("../server");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:3000","https://vercel.com/chinmaykoshes-projects/foodfly"],
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-user-id"]
+}));
 
 // ✅ Root route for quick status check
 app.get("/", (req, res) => {
