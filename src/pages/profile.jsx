@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // ✅ Import useNavigate
+import BackendUrl from './BackendUrl'
+
 
 const Profile = () => {
     const [user, setUser] = useState(null);

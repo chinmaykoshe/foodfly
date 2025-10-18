@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BackendUrl from './BackendUrl'
+
 
 const Signup = () => {
     const [name, setName] = useState("");

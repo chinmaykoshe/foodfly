@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import BackendUrl from './BackendUrl'
+
 
 const Profile = () => {
     const [user, setUser] = useState(null);
