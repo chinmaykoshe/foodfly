@@ -3,6 +3,9 @@ const express = require("express");
 const cors = require("cors");
 const { createClient } = require("@supabase/supabase-js");
 
+const serverless = require("serverless-http");
+const app = require("../server"); 
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -178,4 +181,4 @@ app.get("/orders/:userId", async (req, res) => {
 });
 
 // ✅ Important for Vercel — don't use app.listen()
-module.exports = app;
+module.exports = serverless(app);

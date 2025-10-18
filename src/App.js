@@ -12,6 +12,7 @@ import Order from "./pages/order";
 import Profile from "./pages/profile";
 import AdminPanel from "./pages/admin";
 import Checkout from "./pages/checkout";
+import BackendUrl from "./pages/BackendUrl";
 
 // 🔒 For Admin-only pages
 const PrivateRoute = ({ element, allowedRole }) => {
