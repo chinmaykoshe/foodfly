@@ -36,6 +36,3 @@ FoodFly is a complete food delivery platform with role-based access control, all
 - 👨‍💼 **Admin Panel** - Admin dashboard for managing orders and restaurants
 - 📍 **Real-time Order Tracking** - Track order status in real-time
 - ℹ️ **About Us** - Learn more about the FoodFly platform
-
-## Project Structure
-
