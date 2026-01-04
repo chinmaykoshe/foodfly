@@ -6,8 +6,6 @@ A modern food delivery application built with React, Node.js/Express backend, an
 
 FoodFly is a full-stack food delivery platform that connects customers with restaurants and delivery partners. The application provides a seamless user experience for browsing restaurants, placing orders, and tracking deliveries in real-time.
 
-**Live Demo:** [foodfly-three.vercel.app](https://foodfly-three.vercel.app/)
-
 ## Tech Stack
 
 **Frontend:**
