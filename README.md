@@ -1,70 +1,41 @@
-# Getting Started with Create React App
+# FoodFly 🍕🚀
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern food delivery application built with React, Node.js/Express backend, and serverless architecture.
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+FoodFly is a full-stack food delivery platform that connects customers with restaurants and delivery partners. The application provides a seamless user experience for browsing restaurants, placing orders, and tracking deliveries in real-time.
 
-### `npm start`
+**Live Demo:** [foodfly-three.vercel.app](https://foodfly-three.vercel.app/)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Tech Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+**Frontend:**
+- React.js (96.7% of codebase)
+- HTML5 (1.3%)
+- CSS3 (2.0%)
 
-### `npm test`
+**Backend:**
+- Node.js
+- Express.js
+- Serverless Functions
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**Deployment:**
+- Vercel (Frontend)
+- Cloud Functions (Backend)
 
-### `npm run build`
+## Features
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- 🏪 **Restaurant Discovery** - Browse nearby restaurants with detailed menus
+- 🔍 **Advanced Search & Filters** - Filter by cuisine, price, ratings, and delivery time
+- 📱 **Responsive Design** - Works seamlessly on mobile, tablet, and desktop
+- 🛒 **Shopping Cart** - Add/remove items, manage quantities, view order summary
+- 💳 **Secure Payments** - Integrated payment gateway for transactions
+- 📍 **Real-time Order Tracking** - Track delivery status in real-time
+- 🔐 **User Authentication** - Secure sign-up and login functionality
+- ⭐ **Rating & Reviews** - Rate restaurants and dishes, read customer reviews
+- 📱 **Push Notifications** - Get notified about order status updates
+- 🗺️ **Location-based Services** - Find restaurants near your location
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Project Structure
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
